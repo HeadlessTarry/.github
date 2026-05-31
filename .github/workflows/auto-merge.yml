@@ -7,8 +7,7 @@ on:
       AUTO_APPROVAL_PRIVATE_KEY:
         required: true
 
-permissions:
-  contents: write
+permissions: {}
 
 jobs:
   auto-merge:
@@ -32,7 +31,7 @@ jobs:
 
       - name: ▶️ Enable auto-merge
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           gh pr merge --auto --squash "${{ github.event.pull_request.number }}" \
             --repo "${{ github.repository }}"
