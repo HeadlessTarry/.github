@@ -1,0 +1,29 @@
+---
+name: Auto-Merge Dependabot PRs
+
+on:
+  workflow_call:
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  auto-merge:
+    name: 🔄 Auto-Merge
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    steps:
+      - name: ✅ Auto-approve PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr review --approve "${{ github.event.pull_request.number }}" \
+            --repo "${{ github.repository }}" || true
+
+      - name: ▶️ Enable auto-merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr merge --auto --squash "${{ github.event.pull_request.number }}" \
+            --repo "${{ github.repository }}"
