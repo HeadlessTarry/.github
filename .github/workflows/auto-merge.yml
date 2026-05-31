@@ -3,9 +3,11 @@ name: Auto-Merge Dependabot PRs
 
 on:
   workflow_call:
+    secrets:
+      AUTO_APPROVAL_PRIVATE_KEY:
+        required: true
 
 permissions:
-  pull-requests: write
   contents: write
 
 jobs:
