@@ -13,10 +13,17 @@ jobs:
     name: 🔄 Auto-Merge
     runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]'
-    steps:
+    steps:   
+      - name: 🔑 Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          client-id: ${{ vars.AUTO_APPROVAL_CLIENT_ID }}
+          private-key: ${{ secrets.AUTO_APPROVAL_PRIVATE_KEY }}
+
       - name: ✅ Auto-approve PR
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           gh pr review --approve "${{ github.event.pull_request.number }}" \
             --repo "${{ github.repository }}" || true
