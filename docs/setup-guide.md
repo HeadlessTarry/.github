@@ -7,7 +7,7 @@ This guide walks through adding Dependabot auto-merge to a repository in the `He
 - Repository must be in the `HeadlessTarry` organization
 - You must have admin access to the repository
 - The repository must have CI checks defined in a GitHub Actions workflow
-- The `headlesstarry-pr-auto-approvals` GitHub App must be installed on the repository (see [Step 2](#step-2-install-the-github-app))
+- The `headlesstarry-auto-prs` GitHub App must be installed on the repository (see [Step 2](#step-2-install-the-github-app))
 
 ## Step 1: Add the stub workflow
 
@@ -26,16 +26,16 @@ Create `.github/workflows/auto-merge.yml` in your repository with the following 
         uses: HeadlessTarry/.github/.github/workflows/auto-merge.yml@<full-commit-sha>
         permissions: {}
         secrets:
-          AUTO_APPROVAL_PRIVATE_KEY: ${{ secrets.AUTO_APPROVAL_PRIVATE_KEY }}
+          AUTO_PRS_PRIVATE_KEY: ${{ secrets.AUTO_PRS_PRIVATE_KEY }}
     ```
 
 To find the latest commit SHA, visit [HeadlessTarry/.github](https://github.com/HeadlessTarry/.github) and copy the full commit hash from the latest commit on the `main` branch.
 
 ## Step 2: Install the GitHub App
 
-The `headlesstarry-pr-auto-approvals` GitHub App is required for approving Dependabot PRs and enabling auto-merge. GitHub's built-in `GITHUB_TOKEN` cannot approve PRs on the same repository.
+The `headlesstarry-auto-prs` GitHub App is required for approving Dependabot PRs and enabling auto-merge. GitHub's built-in `GITHUB_TOKEN` cannot approve PRs on the same repository.
 
-1. Go to **HeadlessTarry org Settings** → **GitHub Apps** → **headlesstarry-pr-auto-approvals**
+1. Go to **HeadlessTarry org Settings** → **GitHub Apps** → **headlesstarry-auto-prs**
 2. Click **Install App**
 3. Select the repository (or all repositories)
 4. Grant the requested permissions
@@ -46,13 +46,13 @@ Add the following secrets to your repository (**Settings** → **Secrets and var
 
 | Secret name | Value |
 |---|---|
-| `AUTO_APPROVAL_PRIVATE_KEY` | The PEM private key for the `headlesstarry-pr-auto-approvals` GitHub App |
+| `AUTO_PRS_PRIVATE_KEY` | The PEM private key for the `headlesstarry-auto-prs` GitHub App |
 
 Also add the following **variable** (**Settings** → **Secrets and variables** → **Actions** → **Variables** tab → **New repository variable**):
 
 | Variable name | Value |
 |---|---|
-| `AUTO_APPROVAL_CLIENT_ID` | The Client ID of the `headlesstarry-pr-auto-approvals` GitHub App (starts with `Iv`) |
+| `AUTO_PRS_CLIENT_ID` | The Client ID of the `headlesstarry-auto-prs` GitHub App (starts with `Iv`) |
 
 > **Note:** If you're retrofitting an org that has multiple consumer repos, these can also be configured as **organization secrets/variables** (accessible to all repos) rather than per-repo. The reusable workflow resolves them from the calling repository's context.
 
@@ -79,7 +79,7 @@ The `HeadlessTarry` organization has an org-level ruleset called "Pull Requests 
 
 ### Bypass configuration
 
-Add the `headlesstarry-pr-auto-approvals` GitHub App to the bypass list with mode **Always allow**. This is required so the app can:
+Add the `headlesstarry-auto-prs` GitHub App to the bypass list with mode **Always allow**. This is required so the app can:
 
 - Approve PRs (bypasses "require review" rules)
 - Enable auto-merge (bypasses rules that would otherwise block the merge)
@@ -116,7 +116,7 @@ Required check names must match your CI job names exactly. To find them:
 
 1. Wait for Dependabot to create a PR (or trigger one manually by updating a dependency)
 2. Check that the **Auto-Merge** workflow runs on the PR
-3. Verify the PR shows an approval from `headlesstarry-pr-auto-approvals[bot]`
+3. Verify the PR shows an approval from `headlesstarry-auto-prs[bot]`
 4. Verify the PR shows "Auto-merge enabled" with the squash merge strategy
 5. Confirm the PR is merged automatically after all required checks pass
 
@@ -126,15 +126,15 @@ Required check names must match your CI job names exactly. To find them:
 
 This error means the `GITHUB_TOKEN` is being used for the approval step instead of the GitHub App token. Ensure:
 
-- The reusable workflow references `${{ secrets.AUTO_APPROVAL_PRIVATE_KEY }}` (not `GITHUB_TOKEN`) for the approval step
-- The stub workflow passes the secret through: `secrets: AUTO_APPROVAL_PRIVATE_KEY: ${{ secrets.AUTO_APPROVAL_PRIVATE_KEY }}`
+- The reusable workflow references `${{ secrets.AUTO_PRS_PRIVATE_KEY }}` (not `GITHUB_TOKEN`) for the approval step
+- The stub workflow passes the secret through: `secrets: AUTO_PRS_PRIVATE_KEY: ${{ secrets.AUTO_PRS_PRIVATE_KEY }}`
 
 ### "The 'private-key' input must be set to a non-empty string"
 
-The `AUTO_APPROVAL_PRIVATE_KEY` secret is not accessible to the workflow. For reusable workflows, secrets must be explicitly declared and passed through — they are not inherited automatically. Ensure:
+The `AUTO_PRS_PRIVATE_KEY` secret is not accessible to the workflow. For reusable workflows, secrets must be explicitly declared and passed through — they are not inherited automatically. Ensure:
 
-- The reusable workflow declares `secrets: AUTO_APPROVAL_PRIVATE_KEY: required: true` in `workflow_call`
-- The stub workflow passes the secret: `secrets: AUTO_APPROVAL_PRIVATE_KEY: ${{ secrets.AUTO_APPROVAL_PRIVATE_KEY }}`
+- The reusable workflow declares `secrets: AUTO_PRS_PRIVATE_KEY: required: true` in `workflow_call`
+- The stub workflow passes the secret: `secrets: AUTO_PRS_PRIVATE_KEY: ${{ secrets.AUTO_PRS_PRIVATE_KEY }}`
 - The secret exists as an **organization secret** or **repository secret** on the consumer repo
 
 ### "At least 1 approving review is required by reviewers with write access"

@@ -4,7 +4,7 @@ name: Auto-Merge Dependabot PRs
 on:
   workflow_call:
     secrets:
-      AUTO_APPROVAL_PRIVATE_KEY:
+      AUTO_PRS_PRIVATE_KEY:
         required: true
 
 permissions: {}
@@ -14,13 +14,13 @@ jobs:
     name: 🔄 Auto-Merge
     runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]'
-    steps:   
+    steps:
       - name: 🔑 Generate GitHub App token
         id: app-token
         uses: actions/create-github-app-token@v3
         with:
-          client-id: ${{ vars.AUTO_APPROVAL_CLIENT_ID }}
-          private-key: ${{ secrets.AUTO_APPROVAL_PRIVATE_KEY }}
+          client-id: ${{ vars.AUTO_PRS_CLIENT_ID }}
+          private-key: ${{ secrets.AUTO_PRS_PRIVATE_KEY }}
 
       - name: ✅ Auto-approve PR
         env:
